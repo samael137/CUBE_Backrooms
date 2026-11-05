@@ -1,0 +1,79 @@
+# =============================================================
+#  Unity .gitignore — CUBE_Backrooms
+#  Solo se suben: Assets/, Packages/, ProjectSettings/
+#  Todo lo demás se regenera automáticamente al abrir el proyecto
+# =============================================================
+
+# ── Carpetas generadas por Unity (se recrean solas) ──────────
+/Library/
+/Temp/
+/Logs/
+/obj/
+/Build/
+/Builds/
+/UserSettings/
+
+# ── Archivos de solución / proyecto de IDE ───────────────────
+# (Unity los regenera con Tools > Regenerate Project Files)
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.pidb
+*.booproj
+
+# ── Archivos de VS Code (opcionales, descomenta si prefieres) ─
+# .vscode/
+
+# ── Metadatos de sistema operativo ──────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── JetBrains Rider / ReSharper ─────────────────────────────
+.idea/
+*.sln.iml
+
+# ── Visual Studio ────────────────────────────────────────────
+.vs/
+*.VC.db
+*.VC.opendb
+
+# ── Crashes y logs del editor ────────────────────────────────
+sysinfo.txt
+*.stackdump
+
+# ── Builds exportados ────────────────────────────────────────
+/[Bb]uild/
+/[Bb]uilds/
+/[Rr]elease/
+/[Dd]ebug/
+
+# ── Asset Store y paquetes descargados (no de Packages/) ─────
+# Descomenta si usas carpetas de plugins descargados manualmente:
+# /Assets/Plugins/
+# /Assets/StreamingAssets/
+
+# ── Archivos de cache de herramientas externas ───────────────
+*.pidb.meta
+*.pdb
+*.mdb
+
+# ── Archivos de aceleración NavMesh (se pueden recalcular) ───
+/[Aa]ssets/[Aa]i/
+
+# ── Paquetes Node / npm (si usas herramientas JS en el repo) ─
+node_modules/
+npm-debug.log
+
+# ── Secrets / configuración local ───────────────────────────
+*.env
+*.env.local
+secrets.*
