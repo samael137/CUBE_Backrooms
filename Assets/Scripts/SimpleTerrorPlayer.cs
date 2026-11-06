@@ -18,14 +18,14 @@ public class SimpleTerrorPlayer : MonoBehaviour
 
     [Header("Audio: Pasos")]
     public AudioSource audioPasos;
-    public AudioClip[] clipsPasos; // Puedes arrastrar uno o varios sonidos de pasos
-    public float volumenPasos = 0.6f;
+    public AudioClip clipPaso; // Solo UN sonido de paso
+    [Range(0f, 1f)] public float volumenPasos = 0.8f;
 
     [Header("Audio: Respiración")]
     public AudioSource audioRespiracion;
-    public AudioClip clipRespiracion;
-    [Range(0f, 1f)] public float volumenReposo = 0.15f;  // Cuando camina o está quieto
-    [Range(0f, 1f)] public float volumenCorriendo = 0.7f; // Cuando corre con Shift
+    public AudioClip clipRespiracion; // Solo UN sonido de respiración
+    [Range(0f, 1f)] public float volumenReposo = 0.2f;   // Volumen al estar quieto o caminar
+    [Range(0f, 1f)] public float volumenCorriendo = 0.8f; // Volumen al correr con Shift
 
     private float rotacionX = 0f;
     private float velocidadY = 0f;
@@ -42,7 +42,7 @@ public class SimpleTerrorPlayer : MonoBehaviour
         if (camara != null)
             alturaCamaraOriginal = camara.localPosition.y;
 
-        // Iniciar sonido de respiración en bucle
+        // Iniciar la respiración en bucle automático
         if (audioRespiracion != null && clipRespiracion != null)
         {
             audioRespiracion.clip = clipRespiracion;
@@ -51,7 +51,7 @@ public class SimpleTerrorPlayer : MonoBehaviour
             audioRespiracion.Play();
         }
 
-        // Ocultar y centrar el ratón
+        // Bloquear y centrar el ratón
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -70,7 +70,7 @@ public class SimpleTerrorPlayer : MonoBehaviour
 
         transform.Rotate(0f, mouseX, 0f);
 
-        // 2. Movimiento con teclado
+        // 2. Movimiento con WASD
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
@@ -78,7 +78,7 @@ public class SimpleTerrorPlayer : MonoBehaviour
         float velocidadDeseada = estaCorriendo ? velocidadCorrer : velocidadCaminar;
         Vector3 direccion = (transform.right * x + transform.forward * z).normalized * velocidadDeseada;
 
-        // Aceleración suave (inercia humana)
+        // Inercia suave (aceleración humana)
         velocidadActual = Vector3.Lerp(velocidadActual, direccion, Time.deltaTime * 6f);
 
         // Gravedad
@@ -91,7 +91,7 @@ public class SimpleTerrorPlayer : MonoBehaviour
         movimientoFinal.y = velocidadY;
         controller.Move(movimientoFinal * Time.deltaTime);
 
-        // 3. Balanceo de pasos (Headbob) y Sonido de Pisadas
+        // 3. Balanceo de pasos y sonido de pisada
         float velocidadHorizontal = new Vector3(velocidadActual.x, 0f, velocidadActual.z).magnitude;
 
         if (camara != null && controller.isGrounded && velocidadHorizontal > 0.2f)
@@ -103,15 +103,18 @@ public class SimpleTerrorPlayer : MonoBehaviour
             float nuevoY = alturaCamaraOriginal + seno * alturaPaso;
             camara.localPosition = new Vector3(camara.localPosition.x, nuevoY, camara.localPosition.z);
 
-            // Cada vez que el pie toca el suelo (valle de la onda senoidal)
+            // Tocar el suelo = disparar sonido de paso
             if (seno < -0.85f && !pasoDisparado)
             {
-                ReproducirPaso();
+                if (audioPasos != null && clipPaso != null)
+                {
+                    audioPasos.PlayOneShot(clipPaso, volumenPasos);
+                }
                 pasoDisparado = true;
             }
             else if (seno > 0f)
             {
-                pasoDisparado = false; // Se reinicia para el siguiente paso
+                pasoDisparado = false;
             }
         }
         else if (camara != null)
@@ -122,34 +125,18 @@ public class SimpleTerrorPlayer : MonoBehaviour
             camara.localPosition = new Vector3(camara.localPosition.x, resetY, camara.localPosition.z);
         }
 
-        // 4. Modular volumen de respiración según si corre o camina
+        // 4. Regular volumen de respiración según si corre o camina
         if (audioRespiracion != null)
         {
             float volumenDeseado = (estaCorriendo && velocidadHorizontal > 0.2f) ? volumenCorriendo : volumenReposo;
             audioRespiracion.volume = Mathf.Lerp(audioRespiracion.volume, volumenDeseado, Time.deltaTime * 2f);
         }
 
-        // 5. Salir del juego o liberar ratón con Escape
+        // 5. Liberar ratón con Escape
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = (CursorLockMode.Locked == CursorLockMode.Locked && !Cursor.visible) ? CursorLockMode.None : CursorLockMode.Locked;
             Cursor.visible = !Cursor.visible;
-        }
-    }
-
-    // Reproduce un sonido de paso con variación natural de tono (pitch)
-    void ReproducirPaso()
-    {
-        if (audioPasos == null || clipsPasos == null || clipsPasos.Length == 0)
-            return;
-
-        // Elegir clip al azar si hay varios
-        AudioClip clipSeleccionado = clipsPasos[Random.Range(0, clipsPasos.Length)];
-        if (clipSeleccionado != null)
-        {
-            // Variar ligeramente el tono entre 0.9 y 1.1 para que suene orgánico
-            audioPasos.pitch = Random.Range(0.9f, 1.1f);
-            audioPasos.PlayOneShot(clipSeleccionado, volumenPasos);
         }
     }
 }
