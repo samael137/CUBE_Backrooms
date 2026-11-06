@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 6852663727572481809}
   - component: {fileID: 8764166830185645457}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Techo_Modulo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -495,7 +495,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (3)
+      value: Foco_04
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -643,7 +643,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (11)
+      value: Foco_12
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -721,7 +721,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (9)
+      value: Foco_10
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -1071,7 +1071,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (7)
+      value: Foco_08
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -1211,7 +1211,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (4)
+      value: Foco_05
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -1289,7 +1289,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco
+      value: Foco_01
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -1747,7 +1747,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (13)
+      value: Foco_14
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -2097,7 +2097,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (14)
+      value: Foco_15
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -2237,7 +2237,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (15)
+      value: Foco_16
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -2385,7 +2385,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (1)
+      value: Foco_02
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -2525,7 +2525,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (12)
+      value: Foco_13
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -2851,7 +2851,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (8)
+      value: Foco_09
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -2929,7 +2929,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (6)
+      value: Foco_07
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -3407,7 +3407,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (5)
+      value: Foco_06
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -3625,7 +3625,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (2)
+      value: Foco_03
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -3703,7 +3703,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (10)
+      value: Foco_11
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
@@ -4161,7 +4161,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3594796692221606798, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_Name
-      value: foco (16)
+      value: Foco_17
       objectReference: {fileID: 0}
     - target: {fileID: 6129399960343959966, guid: 643a51c700d4b9292b0d57037aa5069f, type: 3}
       propertyPath: m_LocalScale.y
