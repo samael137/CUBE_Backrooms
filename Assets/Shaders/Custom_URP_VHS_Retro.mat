@@ -32,7 +32,7 @@ Material:
     - _ColorShift: 0.004
     - _GlitchIntensity: 0.003
     - _GlitchSpeed: 8
-    - _NoiseIntensity: 0.06
+    - _NoiseIntensity: 0.02
     - _ScanlineCount: 540
     - _ScanlineIntensity: 0.35
     - _VignetteStrength: 0.3
