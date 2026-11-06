@@ -156,6 +156,7 @@ GameObject:
   - component: {fileID: 236092503349932403}
   - component: {fileID: 5241197068784966504}
   - component: {fileID: 4569947536082324517}
+  - component: {fileID: 4314149096224569927}
   m_Layer: 0
   m_Name: Spot Light
   m_TagString: Untagged
@@ -272,3 +273,26 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!114 &4314149096224569927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7315314100888417187}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bea1addabdc52b844a71496035d8c004, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HorrorFlickerLight
+  targetLight: {fileID: 0}
+  bulbRenderer: {fileID: 6469422446903883646}
+  baseIntensity: 4
+  minFlickerIntensity: 0.2
+  minFlickerSpeed: 0.04
+  maxFlickerSpeed: 0.15
+  enableBlackouts: 1
+  minTimeBetweenBlackouts: 6
+  maxTimeBetweenBlackouts: 16
+  minBlackoutDuration: 0.8
+  maxBlackoutDuration: 3.5
