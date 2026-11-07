@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 3911787002016076707}
   - component: {fileID: 744778625223504356}
   - component: {fileID: 5609478993216399615}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: suelo
-  m_TagString: Untagged
+  m_TagString: Suelo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
