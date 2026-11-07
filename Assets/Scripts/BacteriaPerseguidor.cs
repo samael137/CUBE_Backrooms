@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 /// <summary>
 /// Control de IA para el enemigo Bacteria Perseguidor en los Backrooms.
-/// Utiliza NavMeshAgent para perseguir al jugador esquivando paredes del laberinto.
+/// Controla NavMeshAgent, audio 3D y animaciones según la velocidad.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class BacteriaPerseguidor : MonoBehaviour
@@ -15,8 +15,11 @@ public class BacteriaPerseguidor : MonoBehaviour
     public float distanciaDeteccion = 15f; // Distancia para empezar a perseguir
     public float distanciaAtaque = 1.5f;   // Distancia para atrapar al jugador
 
-    [Header("Velocidad")]
-    public float velocidadPersecucion = 3.8f; // Algo más rápido que el paso normal del jugador
+    [Header("Velocidad de Movimiento")]
+    public float velocidadPersecucion = 3.8f; // Velocidad del NavMeshAgent al perseguir
+
+    [Header("Animación")]
+    public Animator animator;             // Componente Animator del modelo
 
     [Header("Audio")]
     public AudioSource audioEnemigo;       // Sonido de rugido / pasos de bacteria
@@ -29,6 +32,9 @@ public class BacteriaPerseguidor : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         agent.speed = velocidadPersecucion;
+
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
 
         // Si no se asignó manualmente el jugador, buscarlo por etiqueta
         if (jugador == null)
@@ -49,6 +55,13 @@ public class BacteriaPerseguidor : MonoBehaviour
 
     void Update()
     {
+        // Actualizar el parámetro Velocidad en el Animator según qué tan rápido se mueve el NavMeshAgent
+        if (animator != null)
+        {
+            float velocidadActual = agent.velocity.magnitude;
+            animator.SetFloat("Velocidad", velocidadActual);
+        }
+
         if (jugador == null) return;
 
         // Calcular distancia entre el enemigo y el jugador
@@ -89,6 +102,5 @@ public class BacteriaPerseguidor : MonoBehaviour
     void AtraparJugador()
     {
         Debug.Log("¡El Bacteria te ha atrapado! GAME OVER");
-        // Aquí conectaremos la pantalla de Game Over en la siguiente fase
     }
 }
