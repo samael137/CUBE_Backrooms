@@ -2,45 +2,64 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Dispara un jumpscare con imagen y sonido al pisar una zona invisible.
+/// Jumpscare clásico con sacudida violenta (shake) de imagen y sonido.
 /// </summary>
 public class JumpscareTrigger : MonoBehaviour
 {
     [Header("Elementos del Susto")]
-    public GameObject imagenSusto; // La imagen UI que salta en pantalla
-    public AudioSource audioSusto;  // Parlante con el sonido/grito fuerte
-    public float duracionSusto = 1.2f; // Segundos que dura en pantalla
+    public GameObject imagenSusto;       // La imagen en el Canvas
+    public AudioSource audioSusto;        // Sonido de grito/terror
+    public float duracionSusto = 1.2f;    // Duración en segundos
+
+    [Header("Efecto de Sacudida (Shake)")]
+    public float fuerzaSacudida = 25f;    // Qué tan fuerte tiembla la imagen
 
     private bool yaSeActivo = false;
+    private Vector3 posicionOriginalImagen;
 
     private void OnTriggerEnter(Collider other)
     {
-        // Solo se activa si el que entra es el jugador y no se ha usado antes
         if (other.CompareTag("Player") && !yaSeActivo)
         {
             yaSeActivo = true;
-            StartCoroutine(MostrarSusto());
+            StartCoroutine(EfectoSusto());
         }
     }
 
-    private IEnumerator MostrarSusto()
+    private IEnumerator EfectoSusto()
     {
-        // 1. Mostrar la imagen en pantalla
         if (imagenSusto != null)
+        {
+            posicionOriginalImagen = imagenSusto.transform.localPosition;
             imagenSusto.SetActive(true);
+        }
 
-        // 2. Reproducir sonido de terror
         if (audioSusto != null)
             audioSusto.Play();
 
-        // 3. Esperar la duración del susto
-        yield return new WaitForSeconds(duracionSusto);
+        // Sacudir la imagen mientras dure el susto
+        float tiempoPasado = 0f;
+        while (tiempoPasado < duracionSusto)
+        {
+            if (imagenSusto != null)
+            {
+                // Mover aleatoriamente a los lados y arriba/abajo
+                float offsetX = Random.Range(-fuerzaSacudida, fuerzaSacudida);
+                float offsetY = Random.Range(-fuerzaSacudida, fuerzaSacudida);
+                imagenSusto.transform.localPosition = posicionOriginalImagen + new Vector3(offsetX, offsetY, 0f);
+            }
 
-        // 4. Ocultar la imagen
+            tiempoPasado += Time.deltaTime;
+            yield return null; // Espera al siguiente fotograma
+        }
+
+        // Restaurar posición y apagar
         if (imagenSusto != null)
+        {
+            imagenSusto.transform.localPosition = posicionOriginalImagen;
             imagenSusto.SetActive(false);
+        }
 
-        // 5. Destruir este trigger para que no vuelva a sonar
         Destroy(gameObject);
     }
 }
