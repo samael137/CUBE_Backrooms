@@ -1766,7 +1766,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 88.655
+      value: 88.93
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1774,23 +1774,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 174.91
+      value: 185.39
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: -0.054365516
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0.99852115
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1798,7 +1798,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -186.233
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 63d5731a55c3078638baf774265d3992, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -2241,9 +2241,9 @@ MonoBehaviour:
   distanciaDeteccion: 10
   distanciaAtaque: 1.5
   velocidadPersecucion: 3.5
-  animator: {fileID: 0}
+  animator: {fileID: 1591508496}
   audioEnemigo: {fileID: 1591508492}
-  clipPersecucion: {fileID: 0}
+  clipPersecucion: {fileID: 8300000, guid: 1e0a40251a9b4d15c85b3bae97aaeb58, type: 3}
 --- !u!195 &1591508494
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -4,7 +4,8 @@ using UnityEngine.AI;
 
 /// <summary>
 /// Control de IA para el enemigo Bacteria Perseguidor en los Backrooms.
-/// Persecución por NavMesh y muerte con animación de mordida/ataque y temblor de cámara.
+/// Persigue al jugador por NavMesh. Al atraparlo, frena, pasa a IDLE,
+/// enfoca la cámara a su cabeza y genera sacudida con rugido de muerte.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class BacteriaPerseguidor : MonoBehaviour
@@ -14,11 +15,11 @@ public class BacteriaPerseguidor : MonoBehaviour
     public Camera camaraJugador;          // La cámara en primera persona
 
     [Header("Distancias")]
-    public float distanciaDeteccion = 10f; // Distancia para empezar a perseguir
-    public float distanciaAtaque = 2.0f;   // Distancia para atrapar y morder al jugador
+    public float distanciaDeteccion = 12f; // Distancia para empezar a perseguir
+    public float distanciaAtaque = 2.0f;   // Distancia donde te atrapa frente a frente
 
     [Header("Velocidad")]
-    public float velocidadPersecucion = 3.5f;
+    public float velocidadPersecucion = 3.6f;
 
     [Header("Animación")]
     public Animator animator;
@@ -68,9 +69,9 @@ public class BacteriaPerseguidor : MonoBehaviour
 
     void Update()
     {
-        if (atrapado) return;
+        if (atrapado) return; // Al atraparte, se frena y el Animator queda en Idle
 
-        // Actualizar velocidad en el Animator (caminar o correr)
+        // Actualizar velocidad para cambiar entre Idle y Run
         if (animator != null)
         {
             float velocidadActual = agent.velocity.magnitude;
@@ -115,13 +116,13 @@ public class BacteriaPerseguidor : MonoBehaviour
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
 
-        // 1. Activar la animación de mordida en el Animator
+        // 1. Poner a la bacteria en IDLE inmediatamente
         if (animator != null)
         {
-            animator.SetTrigger("Atacar");
+            animator.SetFloat("Velocidad", 0f);
         }
 
-        // 2. Congelar al jugador para que no escape
+        // 2. Congelar movimiento del jugador
         if (jugador != null)
         {
             SimpleTerrorPlayer scriptPlayer = jugador.GetComponent<SimpleTerrorPlayer>();
@@ -129,10 +130,10 @@ public class BacteriaPerseguidor : MonoBehaviour
                 scriptPlayer.enabled = false;
         }
 
-        StartCoroutine(CinematicaAtaque());
+        StartCoroutine(CinematicaMuerte());
     }
 
-    IEnumerator CinematicaAtaque()
+    IEnumerator CinematicaMuerte()
     {
         if (audioEnemigo != null && audioEnemigo.isPlaying)
             audioEnemigo.Stop();
@@ -140,7 +141,7 @@ public class BacteriaPerseguidor : MonoBehaviour
         if (audioGritoMuerte != null)
             audioGritoMuerte.Play();
 
-        // Que la bacteria mire de frente al jugador
+        // Que la bacteria mire fijamente al jugador
         transform.LookAt(new Vector3(jugador.position.x, transform.position.y, jugador.position.z));
 
         Vector3 posOriginalCamara = Vector3.zero;
@@ -152,13 +153,13 @@ public class BacteriaPerseguidor : MonoBehaviour
         {
             if (camaraJugador != null)
             {
-                // La cámara enfoca directamente a la cabeza/mordida
+                // Enfocar directamente a la cabeza del monstruo
                 Vector3 objetivo = (puntoCabeza != null) ? puntoCabeza.position : transform.position;
                 Vector3 dir = (objetivo - camaraJugador.transform.position).normalized;
                 Quaternion rotDeseada = Quaternion.LookRotation(dir);
                 camaraJugador.transform.rotation = Quaternion.Slerp(camaraJugador.transform.rotation, rotDeseada, Time.deltaTime * 18f);
 
-                // Sacudida de cámara por el impacto del ataque
+                // Sacudida de cámara
                 float temblorX = Random.Range(-fuerzaTemblorCamara, fuerzaTemblorCamara);
                 float temblorY = Random.Range(-fuerzaTemblorCamara, fuerzaTemblorCamara);
                 camaraJugador.transform.localPosition = posOriginalCamara + new Vector3(temblorX, temblorY, 0f);
