@@ -1,42 +1,51 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
 /// Control de IA para el enemigo Bacteria Perseguidor en los Backrooms.
-/// Controla NavMeshAgent, audio 3D y animaciones según la velocidad.
+/// Persecución por NavMesh y muerte con animación de mordida/ataque y temblor de cámara.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class BacteriaPerseguidor : MonoBehaviour
 {
     [Header("Objetivo")]
     public Transform jugador;             // El objeto Player a perseguir
+    public Camera camaraJugador;          // La cámara en primera persona
 
     [Header("Distancias")]
-    public float distanciaDeteccion = 15f; // Distancia para empezar a perseguir
-    public float distanciaAtaque = 1.5f;   // Distancia para atrapar al jugador
+    public float distanciaDeteccion = 10f; // Distancia para empezar a perseguir
+    public float distanciaAtaque = 2.0f;   // Distancia para atrapar y morder al jugador
 
-    [Header("Velocidad de Movimiento")]
-    public float velocidadPersecucion = 3.8f; // Velocidad del NavMeshAgent al perseguir
+    [Header("Velocidad")]
+    public float velocidadPersecucion = 3.5f;
 
     [Header("Animación")]
-    public Animator animator;             // Componente Animator del modelo
+    public Animator animator;
 
     [Header("Audio")]
-    public AudioSource audioEnemigo;       // Sonido de rugido / pasos de bacteria
+    public AudioSource audioEnemigo;
     public AudioClip clipPersecucion;
+    public AudioSource audioGritoMuerte;
+
+    [Header("Muerte / Jumpscare")]
+    public Transform puntoCabeza;          // Hueso Bip001_Head
+    public float fuerzaTemblorCamara = 0.08f;
+    public float duracionSusto = 2.2f;
 
     private NavMeshAgent agent;
     private bool persiguiendo = false;
+    private bool atrapado = false;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         agent.speed = velocidadPersecucion;
+        agent.stoppingDistance = distanciaAtaque;
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
 
-        // Si no se asignó manualmente el jugador, buscarlo por etiqueta
         if (jugador == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -44,7 +53,11 @@ public class BacteriaPerseguidor : MonoBehaviour
                 jugador = playerObj.transform;
         }
 
-        // Configurar audio de persecución en bucle
+        if (camaraJugador == null && jugador != null)
+        {
+            camaraJugador = jugador.GetComponentInChildren<Camera>();
+        }
+
         if (audioEnemigo != null && clipPersecucion != null)
         {
             audioEnemigo.clip = clipPersecucion;
@@ -55,7 +68,9 @@ public class BacteriaPerseguidor : MonoBehaviour
 
     void Update()
     {
-        // Actualizar el parámetro Velocidad en el Animator según qué tan rápido se mueve el NavMeshAgent
+        if (atrapado) return;
+
+        // Actualizar velocidad en el Animator (caminar o correr)
         if (animator != null)
         {
             float velocidadActual = agent.velocity.magnitude;
@@ -64,10 +79,8 @@ public class BacteriaPerseguidor : MonoBehaviour
 
         if (jugador == null) return;
 
-        // Calcular distancia entre el enemigo y el jugador
         float distancia = Vector3.Distance(transform.position, jugador.position);
 
-        // 1. Iniciar persecución si el jugador entra en su rango
         if (distancia <= distanciaDeteccion)
         {
             if (!persiguiendo)
@@ -77,10 +90,8 @@ public class BacteriaPerseguidor : MonoBehaviour
                     audioEnemigo.Play();
             }
 
-            // Ordenar al NavMeshAgent que camine hacia el jugador
             agent.SetDestination(jugador.position);
 
-            // 2. Si atrapa al jugador
             if (distancia <= distanciaAtaque)
             {
                 AtraparJugador();
@@ -88,7 +99,6 @@ public class BacteriaPerseguidor : MonoBehaviour
         }
         else
         {
-            // Si el jugador escapa muy lejos, se detiene
             if (persiguiendo)
             {
                 persiguiendo = false;
@@ -101,6 +111,66 @@ public class BacteriaPerseguidor : MonoBehaviour
 
     void AtraparJugador()
     {
-        Debug.Log("¡El Bacteria te ha atrapado! GAME OVER");
+        atrapado = true;
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+
+        // 1. Activar la animación de mordida en el Animator
+        if (animator != null)
+        {
+            animator.SetTrigger("Atacar");
+        }
+
+        // 2. Congelar al jugador para que no escape
+        if (jugador != null)
+        {
+            SimpleTerrorPlayer scriptPlayer = jugador.GetComponent<SimpleTerrorPlayer>();
+            if (scriptPlayer != null)
+                scriptPlayer.enabled = false;
+        }
+
+        StartCoroutine(CinematicaAtaque());
+    }
+
+    IEnumerator CinematicaAtaque()
+    {
+        if (audioEnemigo != null && audioEnemigo.isPlaying)
+            audioEnemigo.Stop();
+
+        if (audioGritoMuerte != null)
+            audioGritoMuerte.Play();
+
+        // Que la bacteria mire de frente al jugador
+        transform.LookAt(new Vector3(jugador.position.x, transform.position.y, jugador.position.z));
+
+        Vector3 posOriginalCamara = Vector3.zero;
+        if (camaraJugador != null)
+            posOriginalCamara = camaraJugador.transform.localPosition;
+
+        float tiempo = 0f;
+        while (tiempo < duracionSusto)
+        {
+            if (camaraJugador != null)
+            {
+                // La cámara enfoca directamente a la cabeza/mordida
+                Vector3 objetivo = (puntoCabeza != null) ? puntoCabeza.position : transform.position;
+                Vector3 dir = (objetivo - camaraJugador.transform.position).normalized;
+                Quaternion rotDeseada = Quaternion.LookRotation(dir);
+                camaraJugador.transform.rotation = Quaternion.Slerp(camaraJugador.transform.rotation, rotDeseada, Time.deltaTime * 18f);
+
+                // Sacudida de cámara por el impacto del ataque
+                float temblorX = Random.Range(-fuerzaTemblorCamara, fuerzaTemblorCamara);
+                float temblorY = Random.Range(-fuerzaTemblorCamara, fuerzaTemblorCamara);
+                camaraJugador.transform.localPosition = posOriginalCamara + new Vector3(temblorX, temblorY, 0f);
+            }
+
+            tiempo += Time.deltaTime;
+            yield return null;
+        }
+
+        if (camaraJugador != null)
+            camaraJugador.transform.localPosition = posOriginalCamara;
+
+        Debug.Log(">>> PANTALLA GAME OVER <<<");
     }
 }
