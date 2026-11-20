@@ -4,7 +4,7 @@ public class PlayerInteraction : MonoBehaviour
 {
     [Header("Referencias")]
     public Transform camara;              // La cámara en primera persona
-    public UnityEngine.UI.Text textoAviso; // El texto que muestra [E] en pantalla
+    public TMPro.TextMeshProUGUI textoAviso; // El texto que muestra [E] en pantalla
 
     [Header("Configuración")]
     public float distanciaMaxima = 3f;     // Qué tan lejos se puede interactuar
