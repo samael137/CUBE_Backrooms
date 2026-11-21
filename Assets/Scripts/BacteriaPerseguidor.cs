@@ -4,8 +4,8 @@ using UnityEngine.AI;
 
 /// <summary>
 /// Control de IA para el enemigo Bacteria Perseguidor en los Backrooms.
-/// Persigue al jugador por NavMesh. Al atraparlo, frena, pasa a IDLE,
-/// enfoca la cámara a su cabeza y genera sacudida con rugido de muerte.
+/// Patrulla por el escenario buscando al jugador. Al detectarlo, corre hacia él.
+/// Al atraparlo, frena, pasa a IDLE, enfoca la cámara a su cabeza y genera sacudida con rugido de muerte.
 /// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 public class BacteriaPerseguidor : MonoBehaviour
@@ -18,8 +18,15 @@ public class BacteriaPerseguidor : MonoBehaviour
     public float distanciaDeteccion = 12f; // Distancia para empezar a perseguir
     public float distanciaAtaque = 2.0f;   // Distancia donde te atrapa frente a frente
 
-    [Header("Velocidad")]
-    public float velocidadPersecucion = 3.6f;
+    [Header("Velocidades")]
+    public float velocidadPatrullaje = 1.8f;   // Velocidad al deambular
+    public float velocidadPersecucion = 3.6f;  // Velocidad al perseguir
+
+    [Header("Patrullaje / Deambular")]
+    public bool patrullajeActivo = true;
+    public float radioPatrullaje = 15f;        // Radio alrededor para buscar nuevo destino
+    public float tiempoEsperaMin = 2.0f;       // Tiempo mínimo que espera al llegar a un punto
+    public float tiempoEsperaMax = 4.0f;       // Tiempo máximo que espera al llegar a un punto
 
     [Header("Animación")]
     public Animator animator;
@@ -33,16 +40,19 @@ public class BacteriaPerseguidor : MonoBehaviour
     public Transform puntoCabeza;          // Hueso Bip001_Head
     public float fuerzaTemblorCamara = 0.08f;
     public float duracionSusto = 2.2f;
+    public GameObject panelGameOver;       // Panel de Game Over (Paso 3)
 
     private NavMeshAgent agent;
     private bool persiguiendo = false;
     private bool atrapado = false;
+    private bool esperandoEnPunto = false;
+    private float timerEspera = 0f;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = velocidadPersecucion;
-        agent.stoppingDistance = distanciaAtaque;
+        agent.speed = patrullajeActivo ? velocidadPatrullaje : velocidadPersecucion;
+        agent.stoppingDistance = 0.5f;
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
@@ -65,48 +75,113 @@ public class BacteriaPerseguidor : MonoBehaviour
             audioEnemigo.loop = true;
             audioEnemigo.playOnAwake = false;
         }
+
+        // Iniciar patrulla si está activa
+        if (patrullajeActivo)
+        {
+            BuscarNuevoPuntoPatrulla();
+        }
     }
 
     void Update()
     {
         if (atrapado) return; // Al atraparte, se frena y el Animator queda en Idle
 
-        // Actualizar velocidad para cambiar entre Idle y Run
+        // Actualizar velocidad para el Animator (transición Idle / Walk / Run)
         if (animator != null)
         {
             float velocidadActual = agent.velocity.magnitude;
             animator.SetFloat("Velocidad", velocidadActual);
         }
 
-        if (jugador == null) return;
-
-        float distancia = Vector3.Distance(transform.position, jugador.position);
-
-        if (distancia <= distanciaDeteccion)
+        // 1. Comprobar si el jugador está dentro del rango de detección
+        if (jugador != null)
         {
-            if (!persiguiendo)
-            {
-                persiguiendo = true;
-                if (audioEnemigo != null && !audioEnemigo.isPlaying)
-                    audioEnemigo.Play();
-            }
+            float distanciaAlJugador = Vector3.Distance(transform.position, jugador.position);
 
-            agent.SetDestination(jugador.position);
-
-            if (distancia <= distanciaAtaque)
+            if (distanciaAlJugador <= distanciaDeteccion)
             {
-                AtraparJugador();
+                // Iniciar persecución
+                if (!persiguiendo)
+                {
+                    persiguiendo = true;
+                    esperandoEnPunto = false;
+                    agent.speed = velocidadPersecucion;
+                    agent.stoppingDistance = distanciaAtaque;
+
+                    if (audioEnemigo != null && !audioEnemigo.isPlaying)
+                        audioEnemigo.Play();
+                }
+
+                agent.SetDestination(jugador.position);
+
+                // Si alcanzó al jugador para atraparlo
+                if (distanciaAlJugador <= distanciaAtaque)
+                {
+                    AtraparJugador();
+                }
+                return;
             }
         }
-        else
+
+        // 2. Si estaba persiguiendo y el jugador escapó más allá de la detección
+        if (persiguiendo)
         {
-            if (persiguiendo)
+            persiguiendo = false;
+            agent.speed = velocidadPatrullaje;
+            agent.stoppingDistance = 0.5f;
+
+            if (audioEnemigo != null && audioEnemigo.isPlaying)
+                audioEnemigo.Stop();
+
+            BuscarNuevoPuntoPatrulla();
+        }
+
+        // 3. Patrullaje / Deambular libremente por el escenario
+        if (patrullajeActivo)
+        {
+            ActualizarPatrullaje();
+        }
+    }
+
+    private void ActualizarPatrullaje()
+    {
+        // Si no tiene ruta o está atascado, buscar nuevo punto
+        if (!agent.hasPath && !esperandoEnPunto)
+        {
+            BuscarNuevoPuntoPatrulla();
+            return;
+        }
+
+        // Si ya llegó cerca del punto de patrullaje
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.3f)
+        {
+            if (!esperandoEnPunto)
             {
-                persiguiendo = false;
-                agent.ResetPath();
-                if (audioEnemigo != null && audioEnemigo.isPlaying)
-                    audioEnemigo.Stop();
+                esperandoEnPunto = true;
+                timerEspera = Random.Range(tiempoEsperaMin, tiempoEsperaMax);
             }
+            else
+            {
+                timerEspera -= Time.deltaTime;
+                if (timerEspera <= 0f)
+                {
+                    esperandoEnPunto = false;
+                    BuscarNuevoPuntoPatrulla();
+                }
+            }
+        }
+    }
+
+    private void BuscarNuevoPuntoPatrulla()
+    {
+        Vector3 direccionAleatoria = Random.insideUnitSphere * radioPatrullaje;
+        direccionAleatoria += transform.position;
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(direccionAleatoria, out hit, radioPatrullaje, NavMesh.AllAreas))
+        {
+            agent.SetDestination(hit.position);
         }
     }
 
@@ -171,6 +246,14 @@ public class BacteriaPerseguidor : MonoBehaviour
 
         if (camaraJugador != null)
             camaraJugador.transform.localPosition = posOriginalCamara;
+
+        // Mostrar menú de Game Over si existe
+        if (panelGameOver != null)
+        {
+            panelGameOver.SetActive(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
 
         Debug.Log(">>> PANTALLA GAME OVER <<<");
     }

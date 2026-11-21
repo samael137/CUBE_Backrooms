@@ -1967,7 +1967,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 5b6d77f65467961e4b5bd26832e544e1, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.335
+  m_Volume: 0
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2063,9 +2063,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 021e75fc1dd76256492eb4e88b002c2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::JumpscareTrigger
+  volumenOscuridad: {fileID: 1704589306}
+  tiempoRetencionOscuridad: 1
+  tiempoDesvanecimiento: 1.5
   imagenSusto: {fileID: 123293196}
   audioSusto: {fileID: 1298616270}
-  duracionSusto: 3
+  audioLatido: {fileID: 0}
+  duracionSusto: 1.5
   fuerzaSacudida: 15
 --- !u!65 &1298616272
 BoxCollider:
@@ -2692,6 +2696,55 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -4120380417477451609, guid: 63d5731a55c3078638baf774265d3992, type: 3}
   m_PrefabInstance: {fileID: 1228254764}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1704589306
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1704589307}
+  - component: {fileID: 1704589308}
+  m_Layer: 0
+  m_Name: VolumenOscuridadJumpscare
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1704589307
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1704589306}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 467.40228, y: -0.00001, z: 394.24207}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1704589308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1704589306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
+  m_IsGlobal: 1
+  priority: 10
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: c8941af50597fad97bb136d9e1e0edc1, type: 2}
 --- !u!1 &1709581164
 GameObject:
   m_ObjectHideFlags: 0
@@ -3696,3 +3749,4 @@ SceneRoots:
   - {fileID: 1298616274}
   - {fileID: 1228254764}
   - {fileID: 543450653577998995}
+  - {fileID: 1704589307}
