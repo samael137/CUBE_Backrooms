@@ -3,6 +3,7 @@ using UnityEngine;
 public class VitrinaInteractuable : MonoBehaviour, IInteractuable
 {
     public string TextoInteraccion => "Abrir Vitrina";
+    public GameObject esfera;   // <-- Arrastra aquí el objeto Esfera desde la Hierarchy
 
     private bool yaAbierta = false;
 
@@ -13,7 +14,13 @@ public class VitrinaInteractuable : MonoBehaviour, IInteractuable
         yaAbierta = true;
         Debug.Log(">>> Vitrina abierta. La esfera cae al suelo.");
 
-        // TODO: Aquí después activamos la esfera para que caiga con gravedad
-        // Por ahora solo probamos que el mensaje se ejecute
+        if (esfera != null)
+        {
+            esfera.SetActive(true); // Aparece la esfera
+
+            Rigidbody rb = esfera.GetComponent<Rigidbody>();
+            if (rb != null)
+                rb.isKinematic = false; // Ahora sí cae con gravedad
+        }
     }
 }
