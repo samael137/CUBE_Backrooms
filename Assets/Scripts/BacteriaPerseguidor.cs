@@ -247,8 +247,13 @@ public class BacteriaPerseguidor : MonoBehaviour
         if (camaraJugador != null)
             camaraJugador.transform.localPosition = posOriginalCamara;
 
-        // Mostrar menú de Game Over si existe
-        if (panelGameOver != null)
+        // Mostrar menú de Game Over
+        GameOverManager manager = FindFirstObjectByType<GameOverManager>();
+        if (manager != null)
+        {
+            manager.MostrarGameOver();
+        }
+        else if (panelGameOver != null)
         {
             panelGameOver.SetActive(true);
             Cursor.lockState = CursorLockMode.None;
