@@ -17,48 +17,56 @@ public class PlayerInteraction : MonoBehaviour
         // Si el cursor está desbloqueado (menú de Esc, Game Over, etc.), no interactuar
         if (Cursor.lockState != CursorLockMode.Locked)
         {
-            if (textoAviso != null)
-                textoAviso.gameObject.SetActive(false);
+            LimpiarObjetivo();
             return;
         }
 
-        // Disparar un rayo desde la cámara hacia donde mira el jugador
+        objetivoActual = BuscarInteractuableEnMira();
+
+        if (objetivoActual == null)
+        {
+            OcultarAviso();
+            return;
+        }
+
+        MostrarAviso(objetivoActual.TextoInteraccion);
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            objetivoActual.Interactuar();
+        }
+    }
+
+    /// <summary>
+    /// Lanza un rayo desde la cámara y devuelve el IInteractuable apuntado, o null si no hay ninguno.
+    /// </summary>
+    private IInteractuable BuscarInteractuableEnMira()
+    {
+        if (camara == null) return null;
+
         if (Physics.Raycast(camara.position, camara.forward, out RaycastHit hit, distanciaMaxima, capaInteractuable))
-        {
-            // ¿El objeto golpeado implementa IInteractuable?
-            IInteractuable interactuable = hit.collider.GetComponent<IInteractuable>();
+            return hit.collider.GetComponent<IInteractuable>();
 
-            if (interactuable != null)
-            {
-                objetivoActual = interactuable;
+        return null;
+    }
 
-                // Mostrar el aviso en pantalla
-                if (textoAviso != null)
-                {
-                    textoAviso.gameObject.SetActive(true);
-                    textoAviso.text = "[E] " + interactuable.TextoInteraccion;
-                }
+    private void MostrarAviso(string textoInteraccion)
+    {
+        if (textoAviso == null) return;
 
-                // Si presionaste E, ejecutar la interacción
-                if (Input.GetKeyDown(KeyCode.E))
-                {
-                    interactuable.Interactuar();
-                }
-            }
-            else
-            {
-                // Golpeaste algo que no es interactuable
-                objetivoActual = null;
-                if (textoAviso != null)
-                    textoAviso.gameObject.SetActive(false);
-            }
-        }
-        else
-        {
-            // No golpeaste nada dentro de la distancia
-            objetivoActual = null;
-            if (textoAviso != null)
-                textoAviso.gameObject.SetActive(false);
-        }
+        textoAviso.gameObject.SetActive(true);
+        textoAviso.text = "[E] " + textoInteraccion;
+    }
+
+    private void OcultarAviso()
+    {
+        if (textoAviso != null)
+            textoAviso.gameObject.SetActive(false);
+    }
+
+    private void LimpiarObjetivo()
+    {
+        objetivoActual = null;
+        OcultarAviso();
     }
 }

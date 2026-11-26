@@ -87,60 +87,53 @@ public class HorrorFlickerLight : MonoBehaviour
         while (true)
         {
             if (!isBlackout)
-            {
-                float roll = Random.value;
-                float currentIntensity;
-
-                if (roll > 0.45f)
-                {
-                    // Luz casi normal con leve vibración
-                    currentIntensity = Random.Range(baseIntensity * 0.75f, baseIntensity);
-                }
-                else if (roll > 0.15f)
-                {
-                    // Bajón notable de voltaje
-                    currentIntensity = Random.Range(minFlickerIntensity, baseIntensity * 0.45f);
-                }
-                else
-                {
-                    // Corte instantáneo de milisegundos
-                    currentIntensity = 0f;
-                }
-
-                SetLight(currentIntensity);
-            }
+                SetLight(CalcularIntensidadParpadeo());
 
             yield return new WaitForSeconds(Random.Range(minFlickerSpeed, maxFlickerSpeed));
         }
+    }
+
+    private float CalcularIntensidadParpadeo()
+    {
+        float roll = Random.value;
+
+        if (roll > 0.45f)
+            return Random.Range(baseIntensity * 0.75f, baseIntensity);
+
+        if (roll > 0.15f)
+            return Random.Range(minFlickerIntensity, baseIntensity * 0.45f);
+
+        return 0f;
     }
 
     private IEnumerator BlackoutLoop()
     {
         while (true)
         {
-            // Esperar el intervalo antes del siguiente apagón
             yield return new WaitForSeconds(Random.Range(minTimeBetweenBlackouts, maxTimeBetweenBlackouts));
 
-            // Chispazos rápidos previos al apagón
-            int sparks = Random.Range(3, 6);
-            for (int i = 0; i < sparks; i++)
-            {
-                SetLight(0f);
-                yield return new WaitForSeconds(0.04f);
-                SetLight(baseIntensity * 1.2f);
-                yield return new WaitForSeconds(0.05f);
-            }
+            yield return StartCoroutine(EjecutarChispazos());
 
             // APAGÓN TOTAL
             isBlackout = true;
             SetLight(0f);
 
-            // Tiempo a oscuras en silencio
             yield return new WaitForSeconds(Random.Range(minBlackoutDuration, maxBlackoutDuration));
 
-            // Vuelve la luz
             isBlackout = false;
             SetLight(baseIntensity);
+        }
+    }
+
+    private IEnumerator EjecutarChispazos()
+    {
+        int sparks = Random.Range(3, 6);
+        for (int i = 0; i < sparks; i++)
+        {
+            SetLight(0f);
+            yield return new WaitForSeconds(0.04f);
+            SetLight(baseIntensity * 1.2f);
+            yield return new WaitForSeconds(0.05f);
         }
     }
 
@@ -152,18 +145,21 @@ public class HorrorFlickerLight : MonoBehaviour
             targetLight.enabled = intensity > 0.01f;
         }
 
-        // Si hay lámpara asignada, atenuar o apagar su emisión
-        if (bulbMaterial != null && bulbMaterial.HasProperty(EmissionColorProperty))
+        ActualizarEmisionFoco(intensity);
+    }
+
+    private void ActualizarEmisionFoco(float intensity)
+    {
+        if (bulbMaterial == null || !bulbMaterial.HasProperty(EmissionColorProperty)) return;
+
+        if (intensity > 0.01f)
         {
-            if (intensity > 0.01f)
-            {
-                float factor = Mathf.Clamp01(intensity / baseIntensity);
-                bulbMaterial.SetColor(EmissionColorProperty, originalEmissionColor * factor);
-            }
-            else
-            {
-                bulbMaterial.SetColor(EmissionColorProperty, Color.black);
-            }
+            float factor = Mathf.Clamp01(intensity / baseIntensity);
+            bulbMaterial.SetColor(EmissionColorProperty, originalEmissionColor * factor);
+        }
+        else
+        {
+            bulbMaterial.SetColor(EmissionColorProperty, Color.black);
         }
     }
 }

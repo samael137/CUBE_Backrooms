@@ -41,77 +41,96 @@ public class JumpscareTrigger : MonoBehaviour
 
     private IEnumerator EfectoSusto()
     {
-        // 1. Activar volumen de oscuridad al máximo (weight = 1)
-        Volume vol = null;
-        if (volumenOscuridad != null)
-        {
-            volumenOscuridad.SetActive(true);
-            vol = volumenOscuridad.GetComponent<Volume>();
-            if (vol != null)
-                vol.weight = 1f;
-        }
+        Volume vol = ActivarOscuridad();
+        ActivarImagenYSonidos();
 
-        // 2. Activar imagen del susto
+        yield return StartCoroutine(SacudirImagen());
+
+        OcultarImagen();
+
+        if (tiempoRetencionOscuridad > 0f)
+            yield return new WaitForSeconds(tiempoRetencionOscuridad);
+
+        yield return StartCoroutine(DesvanecerOscuridad(vol));
+
+        RestaurarEstadoFinal(vol);
+        Destroy(gameObject);
+    }
+
+    private Volume ActivarOscuridad()
+    {
+        if (volumenOscuridad == null) return null;
+
+        volumenOscuridad.SetActive(true);
+        Volume vol = volumenOscuridad.GetComponent<Volume>();
+        if (vol != null)
+            vol.weight = 1f;
+
+        return vol;
+    }
+
+    private void ActivarImagenYSonidos()
+    {
         if (imagenSusto != null)
         {
             posicionOriginalImagen = imagenSusto.transform.localPosition;
             imagenSusto.SetActive(true);
         }
 
-        // 3. Reproducir sonidos
         if (audioSusto != null)
             audioSusto.Play();
 
         if (audioLatido != null)
             audioLatido.Play();
+    }
 
-        // 4. Sacudir la imagen mientras dure el susto
+    private IEnumerator SacudirImagen()
+    {
         float tiempoPasado = 0f;
         while (tiempoPasado < duracionSusto)
         {
             if (imagenSusto != null)
             {
-                // Mover aleatoriamente a los lados y arriba/abajo
                 float offsetX = Random.Range(-fuerzaSacudida, fuerzaSacudida);
                 float offsetY = Random.Range(-fuerzaSacudida, fuerzaSacudida);
                 imagenSusto.transform.localPosition = posicionOriginalImagen + new Vector3(offsetX, offsetY, 0f);
             }
 
             tiempoPasado += Time.deltaTime;
-            yield return null; // Espera al siguiente fotograma
+            yield return null;
         }
+    }
 
-        // 5. APAGAR LA IMAGEN PRIMERO: Ahora la pantalla se despeja y se ve la escena oscura
-        if (imagenSusto != null)
-        {
-            imagenSusto.transform.localPosition = posicionOriginalImagen;
-            imagenSusto.SetActive(false);
-        }
+    private void OcultarImagen()
+    {
+        if (imagenSusto == null) return;
 
-        // 6. Mantener la oscuridad unos segundos después de que se va la imagen
-        if (tiempoRetencionOscuridad > 0f)
-        {
-            yield return new WaitForSeconds(tiempoRetencionOscuridad);
-        }
+        imagenSusto.transform.localPosition = posicionOriginalImagen;
+        imagenSusto.SetActive(false);
+    }
 
-        // 7. Desvanecimiento suave (fade out) del oscurecimiento hacia la iluminación normal
-        if (vol != null && tiempoDesvanecimiento > 0f)
-        {
-            float tiempoFade = 0f;
-            while (tiempoFade < tiempoDesvanecimiento)
-            {
-                tiempoFade += Time.deltaTime;
-                vol.weight = Mathf.Lerp(1f, 0f, tiempoFade / tiempoDesvanecimiento);
-                yield return null;
-            }
-            vol.weight = 0f;
-        }
-        else if (tiempoDesvanecimiento > 0f)
+    private IEnumerator DesvanecerOscuridad(Volume vol)
+    {
+        if (tiempoDesvanecimiento <= 0f) yield break;
+
+        if (vol == null)
         {
             yield return new WaitForSeconds(tiempoDesvanecimiento);
+            yield break;
         }
 
-        // 8. Desactivar el volumen y restaurar weight para futuros usos
+        float tiempoFade = 0f;
+        while (tiempoFade < tiempoDesvanecimiento)
+        {
+            tiempoFade += Time.deltaTime;
+            vol.weight = Mathf.Lerp(1f, 0f, tiempoFade / tiempoDesvanecimiento);
+            yield return null;
+        }
+        vol.weight = 0f;
+    }
+
+    private void RestaurarEstadoFinal(Volume vol)
+    {
         if (volumenOscuridad != null)
         {
             volumenOscuridad.SetActive(false);
@@ -119,12 +138,7 @@ public class JumpscareTrigger : MonoBehaviour
                 vol.weight = 1f;
         }
 
-        // 9. Detener el latido si aún está sonando
         if (audioLatido != null && audioLatido.isPlaying)
-        {
             audioLatido.Stop();
-        }
-
-        Destroy(gameObject);
     }
 }

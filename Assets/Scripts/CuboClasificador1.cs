@@ -11,23 +11,9 @@ public class CuboClasificador1 : MonoBehaviour, IInteractuable
     {
         if (yaActivado) return;
 
-        // Buscar el jugador por tag
-        GameObject jugador = GameObject.FindGameObjectWithTag("Player");
-        if (jugador == null)
-        {
-            Debug.Log(">>> No se encontró al jugador.");
-            return;
-        }
+        InventarioJugador inventario = ObtenerInventarioJugador();
+        if (inventario == null) return;
 
-        // Buscar el inventario del jugador
-        InventarioJugador inventario = jugador.GetComponent<InventarioJugador>();
-        if (inventario == null)
-        {
-            Debug.Log(">>> El jugador no tiene InventarioJugador.");
-            return;
-        }
-
-        // Verificar si tiene las 2 piezas oficiales
         if (!inventario.TieneTodasLasPiezas())
         {
             Debug.Log(">>> Te faltan piezas para activar el cubo clasificador.");
@@ -35,6 +21,30 @@ public class CuboClasificador1 : MonoBehaviour, IInteractuable
         }
 
         yaActivado = true;
+        ActivarSaltoNoclip();
+    }
+
+    private InventarioJugador ObtenerInventarioJugador()
+    {
+        GameObject jugador = GameObject.FindGameObjectWithTag("Player");
+        if (jugador == null)
+        {
+            Debug.Log(">>> No se encontró al jugador.");
+            return null;
+        }
+
+        InventarioJugador inventario = jugador.GetComponent<InventarioJugador>();
+        if (inventario == null)
+        {
+            Debug.Log(">>> El jugador no tiene InventarioJugador.");
+            return null;
+        }
+
+        return inventario;
+    }
+
+    private void ActivarSaltoNoclip()
+    {
         Debug.Log(">>> Cubo Clasificador activado. Saltando a Escenario 2...");
 
         // TODO: Aquí después agregamos el efecto visual y sonoro de Noclip

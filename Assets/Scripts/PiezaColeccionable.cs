@@ -17,20 +17,19 @@ public class PiezaColeccionable : MonoBehaviour, IInteractuable
         yaRecogida = true;
         Debug.Log($">>> {nombrePieza} recogida.");
 
-        // Si es pieza oficial, avisar al inventario del jugador
         if (esPiezaOficial)
-        {
-            GameObject jugador = GameObject.FindGameObjectWithTag("Player");
-            if (jugador != null)
-            {
-                InventarioJugador inventario = jugador.GetComponent<InventarioJugador>();
-                if (inventario != null)
-                {
-                    inventario.AgregarPieza();
-                }
-            }
-        }
+            NotificarInventario();
 
         gameObject.SetActive(false); // Desaparece de la escena
+    }
+
+    private void NotificarInventario()
+    {
+        GameObject jugador = GameObject.FindGameObjectWithTag("Player");
+        if (jugador == null) return;
+
+        InventarioJugador inventario = jugador.GetComponent<InventarioJugador>();
+        if (inventario != null)
+            inventario.AgregarPieza();
     }
 }

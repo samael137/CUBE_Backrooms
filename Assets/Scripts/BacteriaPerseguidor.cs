@@ -50,6 +50,31 @@ public class BacteriaPerseguidor : MonoBehaviour
 
     void Start()
     {
+        InicializarAgenteYReferencias();
+        InicializarAudioPersecucion();
+
+        if (patrullajeActivo)
+            BuscarNuevoPuntoPatrulla();
+    }
+
+    void Update()
+    {
+        if (atrapado) return; // Al atraparte, se frena y el Animator queda en Idle
+
+        ActualizarAnimacion(agent.velocity.magnitude);
+
+        if (IntentarPerseguirJugador())
+            return;
+
+        if (persiguiendo)
+            DetenerPersecucion();
+
+        if (patrullajeActivo)
+            ActualizarPatrullaje();
+    }
+
+    private void InicializarAgenteYReferencias()
+    {
         agent = GetComponent<NavMeshAgent>();
         agent.speed = patrullajeActivo ? velocidadPatrullaje : velocidadPersecucion;
         agent.stoppingDistance = 0.5f;
@@ -65,83 +90,66 @@ public class BacteriaPerseguidor : MonoBehaviour
         }
 
         if (camaraJugador == null && jugador != null)
-        {
             camaraJugador = jugador.GetComponentInChildren<Camera>();
-        }
-
-        if (audioEnemigo != null && clipPersecucion != null)
-        {
-            audioEnemigo.clip = clipPersecucion;
-            audioEnemigo.loop = true;
-            audioEnemigo.playOnAwake = false;
-        }
-
-        // Iniciar patrulla si está activa
-        if (patrullajeActivo)
-        {
-            BuscarNuevoPuntoPatrulla();
-        }
     }
 
-    void Update()
+    private void InicializarAudioPersecucion()
     {
-        if (atrapado) return; // Al atraparte, se frena y el Animator queda en Idle
+        if (audioEnemigo == null || clipPersecucion == null) return;
 
-        // Actualizar velocidad para el Animator (transición Idle / Walk / Run)
+        audioEnemigo.clip = clipPersecucion;
+        audioEnemigo.loop = true;
+        audioEnemigo.playOnAwake = false;
+    }
+
+    private void ActualizarAnimacion(float velocidadActual)
+    {
         if (animator != null)
-        {
-            float velocidadActual = agent.velocity.magnitude;
             animator.SetFloat("Velocidad", velocidadActual);
-        }
+    }
 
-        // 1. Comprobar si el jugador está dentro del rango de detección
-        if (jugador != null)
-        {
-            float distanciaAlJugador = Vector3.Distance(transform.position, jugador.position);
+    /// <summary>
+    /// Comprueba si el jugador está dentro del rango de detección y gestiona la persecución o captura.
+    /// </summary>
+    private bool IntentarPerseguirJugador()
+    {
+        if (jugador == null) return false;
 
-            if (distanciaAlJugador <= distanciaDeteccion)
-            {
-                // Iniciar persecución
-                if (!persiguiendo)
-                {
-                    persiguiendo = true;
-                    esperandoEnPunto = false;
-                    agent.speed = velocidadPersecucion;
-                    agent.stoppingDistance = distanciaAtaque;
+        float distanciaAlJugador = Vector3.Distance(transform.position, jugador.position);
+        if (distanciaAlJugador > distanciaDeteccion) return false;
 
-                    if (audioEnemigo != null && !audioEnemigo.isPlaying)
-                        audioEnemigo.Play();
-                }
+        if (!persiguiendo)
+            IniciarPersecucion();
 
-                agent.SetDestination(jugador.position);
+        agent.SetDestination(jugador.position);
 
-                // Si alcanzó al jugador para atraparlo
-                if (distanciaAlJugador <= distanciaAtaque)
-                {
-                    AtraparJugador();
-                }
-                return;
-            }
-        }
+        if (distanciaAlJugador <= distanciaAtaque)
+            AtraparJugador();
 
-        // 2. Si estaba persiguiendo y el jugador escapó más allá de la detección
-        if (persiguiendo)
-        {
-            persiguiendo = false;
-            agent.speed = velocidadPatrullaje;
-            agent.stoppingDistance = 0.5f;
+        return true;
+    }
 
-            if (audioEnemigo != null && audioEnemigo.isPlaying)
-                audioEnemigo.Stop();
+    private void IniciarPersecucion()
+    {
+        persiguiendo = true;
+        esperandoEnPunto = false;
+        agent.speed = velocidadPersecucion;
+        agent.stoppingDistance = distanciaAtaque;
 
-            BuscarNuevoPuntoPatrulla();
-        }
+        if (audioEnemigo != null && !audioEnemigo.isPlaying)
+            audioEnemigo.Play();
+    }
 
-        // 3. Patrullaje / Deambular libremente por el escenario
-        if (patrullajeActivo)
-        {
-            ActualizarPatrullaje();
-        }
+    private void DetenerPersecucion()
+    {
+        persiguiendo = false;
+        agent.speed = velocidadPatrullaje;
+        agent.stoppingDistance = 0.5f;
+
+        if (audioEnemigo != null && audioEnemigo.isPlaying)
+            audioEnemigo.Stop();
+
+        BuscarNuevoPuntoPatrulla();
     }
 
     private void ActualizarPatrullaje()
@@ -219,22 +227,25 @@ public class BacteriaPerseguidor : MonoBehaviour
         // Que la bacteria mire fijamente al jugador
         transform.LookAt(new Vector3(jugador.position.x, transform.position.y, jugador.position.z));
 
-        Vector3 posOriginalCamara = Vector3.zero;
-        if (camaraJugador != null)
-            posOriginalCamara = camaraJugador.transform.localPosition;
+        yield return StartCoroutine(EjecutarEnfoqueYTemblorCamara());
 
+        MostrarPantallaGameOver();
+    }
+
+    private IEnumerator EjecutarEnfoqueYTemblorCamara()
+    {
+        Vector3 posOriginalCamara = (camaraJugador != null) ? camaraJugador.transform.localPosition : Vector3.zero;
         float tiempo = 0f;
+
         while (tiempo < duracionSusto)
         {
             if (camaraJugador != null)
             {
-                // Enfocar directamente a la cabeza del monstruo
                 Vector3 objetivo = (puntoCabeza != null) ? puntoCabeza.position : transform.position;
                 Vector3 dir = (objetivo - camaraJugador.transform.position).normalized;
                 Quaternion rotDeseada = Quaternion.LookRotation(dir);
                 camaraJugador.transform.rotation = Quaternion.Slerp(camaraJugador.transform.rotation, rotDeseada, Time.deltaTime * 18f);
 
-                // Sacudida de cámara
                 float temblorX = Random.Range(-fuerzaTemblorCamara, fuerzaTemblorCamara);
                 float temblorY = Random.Range(-fuerzaTemblorCamara, fuerzaTemblorCamara);
                 camaraJugador.transform.localPosition = posOriginalCamara + new Vector3(temblorX, temblorY, 0f);
@@ -246,8 +257,10 @@ public class BacteriaPerseguidor : MonoBehaviour
 
         if (camaraJugador != null)
             camaraJugador.transform.localPosition = posOriginalCamara;
+    }
 
-        // Mostrar menú de Game Over
+    private void MostrarPantallaGameOver()
+    {
         GameOverManager manager = FindFirstObjectByType<GameOverManager>();
         if (manager != null)
         {
