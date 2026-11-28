@@ -20,6 +20,7 @@ public class BacteriaPerseguidor : MonoBehaviour
 
     [Header("Velocidades")]
     public float velocidadPatrullaje = 1.8f;   // Velocidad al deambular
+    public float velocidadAlerta = 5.5f;       // Velocidad al ir a investigar un lugar
     public float velocidadPersecucion = 3.6f;  // Velocidad al perseguir
 
     [Header("Patrullaje / Deambular")]
@@ -43,7 +44,9 @@ public class BacteriaPerseguidor : MonoBehaviour
     public GameObject panelGameOver;       // Panel de Game Over (Paso 3)
 
     private NavMeshAgent agent;
+    private float aceleracionOriginal = 8f;
     private bool persiguiendo = false;
+    private bool investigando = false;
     private bool atrapado = false;
     private bool esperandoEnPunto = false;
     private float timerEspera = 0f;
@@ -69,6 +72,12 @@ public class BacteriaPerseguidor : MonoBehaviour
         if (persiguiendo)
             DetenerPersecucion();
 
+        if (investigando)
+        {
+            ActualizarInvestigacion();
+            return;
+        }
+
         if (patrullajeActivo)
             ActualizarPatrullaje();
     }
@@ -76,6 +85,7 @@ public class BacteriaPerseguidor : MonoBehaviour
     private void InicializarAgenteYReferencias()
     {
         agent = GetComponent<NavMeshAgent>();
+        aceleracionOriginal = agent.acceleration;
         agent.speed = patrullajeActivo ? velocidadPatrullaje : velocidadPersecucion;
         agent.stoppingDistance = 0.5f;
 
@@ -132,12 +142,54 @@ public class BacteriaPerseguidor : MonoBehaviour
     private void IniciarPersecucion()
     {
         persiguiendo = true;
+        investigando = false;
         esperandoEnPunto = false;
+        agent.isStopped = false;
+        agent.acceleration = aceleracionOriginal;
         agent.speed = velocidadPersecucion;
         agent.stoppingDistance = distanciaAtaque;
 
         if (audioEnemigo != null && !audioEnemigo.isPlaying)
             audioEnemigo.Play();
+    }
+
+    /// <summary>
+    /// Envía a la Bacteria de inmediato hacia un punto de alerta. Si llega y no ve al jugador, vuelve a deambular.
+    /// </summary>
+    public void InvestigarLugar(Vector3 puntoObjetivo)
+    {
+        if (atrapado || persiguiendo || agent == null || !agent.isOnNavMesh) return;
+
+        if (NavMesh.SamplePosition(puntoObjetivo, out NavMeshHit hit, 5f, NavMesh.AllAreas))
+        {
+            investigando = true;
+            esperandoEnPunto = false;
+            agent.isStopped = false;
+            agent.acceleration = 20f;
+            agent.speed = velocidadAlerta;
+            agent.stoppingDistance = 0.5f;
+            agent.SetDestination(hit.position);
+        }
+    }
+
+    private void ActualizarInvestigacion()
+    {
+        if (agent.pathPending) return;
+
+        if (!agent.hasPath || agent.remainingDistance <= agent.stoppingDistance + 0.3f)
+            FinalizarInvestigacion();
+    }
+
+    private void FinalizarInvestigacion()
+    {
+        investigando = false;
+        esperandoEnPunto = false;
+        agent.acceleration = aceleracionOriginal;
+        agent.speed = velocidadPatrullaje;
+        agent.stoppingDistance = 0.5f;
+
+        if (patrullajeActivo)
+            BuscarNuevoPuntoPatrulla();
     }
 
     private void DetenerPersecucion()
